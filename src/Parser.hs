@@ -39,13 +39,13 @@ word = token (letter # iter letter >-> cons)
 
 chars :: Int -> Parser String
 chars 0 = return []
-chars n = char # chars (n - 1) >-> cons ! return [] -- The last return [] is if n is larger than the input string's length since then won't the above base case be met
+chars n = char # chars (n - 1) >-> cons ! fail -- The fail is if n is larger than the input string's length
 
 accept :: String -> Parser String
 accept w = (token (chars (length w))) ? (==w)
 
 require :: String -> Parser String
-require w  = accept w ! err ("Required string \"" ++ w ++ "\" not found")
+require w  = accept w ! err ("Program error: expecting " ++ w)
 
 lit :: Char -> Parser Char
 lit c = token char ? (==c)
