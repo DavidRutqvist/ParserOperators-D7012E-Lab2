@@ -23,9 +23,9 @@ module Expr(Expr, T, parse, fromString, value, toString) where
    value e env evaluates e in an environment env that is represented by a
    Dictionary.T Int.
 -}
-import Prelude hiding (return, fail)
-import Parser hiding (T)
 import qualified Dictionary
+import           Parser     hiding (T)
+import           Prelude    hiding (fail, return)
 
 data Expr = Num Integer | Var String | Add Expr Expr
        | Sub Expr Expr | Mul Expr Expr | Div Expr Expr
@@ -63,8 +63,8 @@ expr = term #> expr'
 parens cond str = if cond then "(" ++ str ++ ")" else str
 
 shw :: Int -> Expr -> String
-shw prec (Num n) = show n
-shw prec (Var v) = v
+shw prec (Num n)   = show n
+shw prec (Var v)   = v
 shw prec (Add t u) = parens (prec>5) (shw 5 t ++ "+" ++ shw 5 u)
 shw prec (Sub t u) = parens (prec>5) (shw 5 t ++ "-" ++ shw 6 u)
 shw prec (Mul t u) = parens (prec>6) (shw 6 t ++ "*" ++ shw 6 u)
@@ -72,11 +72,15 @@ shw prec (Div t u) = parens (prec>6) (shw 6 t ++ "/" ++ shw 7 u)
 
 value :: Expr -> Dictionary.T String Integer -> Integer
 value (Num n) _ = n
-value (Var v) dict = case Dictionary.lookup v dict of Just y -> y ; _ -> error("Expr.value: undefined variable " ++ v)
+value (Var v) dict = case Dictionary.lookup v dict of
+                          Just y -> y
+                          _ -> error("Expr.value: undefined variable " ++ v)
 value (Add t u) dict = value t dict + value u dict
 value (Sub t u) dict = value t dict - value u dict
 value (Mul t u) dict = value t dict * value u dict
-value (Div t u) dict = case value u dict of 0 -> error "Expr.value: division by 0" ; valU -> div (value t dict) (valU)
+value (Div t u) dict = case value u dict of
+                          0    -> error "Expr.value: division by 0"
+                          valU -> div (value t dict) (valU)
 
 
 instance Parse Expr where
