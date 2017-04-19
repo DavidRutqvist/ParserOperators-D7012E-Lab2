@@ -1,1 +1,1 @@
-# Parser Operations in Haskell [D7012E Lab 2 2017]
+# Parser Operators in Haskell [D7012E Lab 2 2017]

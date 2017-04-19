@@ -17,31 +17,35 @@ iter m = m # iter m >-> cons ! return []
 cons(a, b) = a:b
 
 (-#) :: Parser a -> Parser b -> Parser b
-m -# n = error "-# not implemented"
+m -# n = m # n >-> snd
 
 (#-) :: Parser a -> Parser b -> Parser a
-m #- n = error "#- not implemented"
+m #- n = m # n >-> fst
 
 spaces :: Parser String
-spaces =  error "spaces not implemented"
+spaces = iter space--space # iter space >-> cons
+
+space :: Parser Char
+space = char ? isSpace
 
 token :: Parser a -> Parser a
 token m = m #- spaces
 
 letter :: Parser Char
-letter =  char ? isAlpha
+letter = char ? isAlpha
 
 word :: Parser String
 word = token (letter # iter letter >-> cons)
 
 chars :: Int -> Parser String
-chars n =  error "chars not implemented"
+chars 0 = return []
+chars n = char # chars (n - 1) >-> cons ! return [] -- The last return [] is if n is larger than the input string's length since then won't the above base case be met
 
 accept :: String -> Parser String
 accept w = (token (chars (length w))) ? (==w)
 
 require :: String -> Parser String
-require w  = error "require not implemented"
+require w  = accept w ! err ("Required string \"" ++ w ++ "\" not found")
 
 lit :: Char -> Parser Char
 lit c = token char ? (==c)
