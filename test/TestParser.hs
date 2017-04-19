@@ -1,7 +1,7 @@
 {- Test for Parser.hs -}
 module TestParser where
 
-import Prelude hiding (fail)
+import Prelude hiding (fail, return)
 import Parser
 import Test.QuickCheck
 import Control.Exception
