@@ -4,7 +4,6 @@ module TestParser where
 import Prelude hiding (fail, return)
 import Parser
 import Test.QuickCheck
-import Control.Exception
 
 test = do
         quickCheck l1
