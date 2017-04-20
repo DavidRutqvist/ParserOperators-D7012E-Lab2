@@ -1,5 +1,6 @@
 import TestParser
 import TestExpr
+import TestStatement
 
 main :: IO ()
 main = do
@@ -8,4 +9,7 @@ main = do
         putStrLn "--- Done ---"
         putStrLn "--- Testing EXPR ---"
         TestExpr.test
+        putStrLn "--- Done ---"
+        putStrLn "--- Testing Statement ---"
+        TestStatement.test
         putStrLn "--- Done ---"

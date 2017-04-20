@@ -1,4 +1,4 @@
-module Statement(T, parse, toString, fromString, exec, block) where
+module Statement(T, parse, toString, fromString, exec) where
 import qualified Dictionary
 import qualified Expr
 import           Parser     hiding (T)
@@ -18,13 +18,13 @@ data Statement =
 assignment = word #- accept ":=" # Expr.parse #- require ";" >-> buildAss
 buildAss (v, e) = Assignment v e
 
-if' = accept "if" -# Expr.parse #- require "then" # parse #- require "else" # parse >-> buildIf
+if' = accept "if" -# Expr.parse #- require "then" # parseSingle #- require "else" # parseSingle >-> buildIf
 buildIf ((expression, thenStatements), elseStatements) = If expression thenStatements elseStatements
 
 skip = accept "skip" #- require ";" >-> buildSkip
 buildSkip (_) = Skip
 
-while = accept "while" -# Expr.parse #- require "do" # parse >-> buildWhile
+while = accept "while" -# Expr.parse #- require "do" # parseSingle >-> buildWhile
 buildWhile (e, s) = While e s
 
 read' = accept "read" -# word #- require ";" >-> buildRead
@@ -33,10 +33,10 @@ buildRead (v) = Read v
 write = accept "write" -# Expr.parse #- require ";" >-> buildWrite
 buildWrite (e) = Write e
 
-block = accept "begin" -# iter parse #- require "end" >-> buildBlock
+block = accept "begin" -# parseMany #- require "end" >-> buildBlock
 buildBlock (statements) = Block statements
 
-doWhile = accept "repeat" -# parse #- require "until" # Expr.parse #- require ";" >-> buildDoWhile
+doWhile = accept "repeat" -# parseSingle #- require "until" # Expr.parse #- require ";" >-> buildDoWhile
 buildDoWhile (s, e) = Repeat s e
 
 exec :: [T] -> Dictionary.T String Integer -> [Integer] -> [Integer]
@@ -45,6 +45,9 @@ exec (If cond thenStmts elseStmts: stmts) dict input =
     then exec (thenStmts: stmts) dict input
     else exec (elseStmts: stmts) dict input
 
+parseSingle = (assignment ! if' ! skip ! while ! read' ! write ! block ! doWhile)
+parseMany = iter parseSingle
+
 instance Parse Statement where
-  parse = error "Statement.parse not implemented"
+  parse = parseSingle
   toString = error "Statement.toString not implemented"
