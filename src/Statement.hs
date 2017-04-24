@@ -56,9 +56,32 @@ exec (Block blockStmts: stmts) dict input = exec (blockStmts ++ stmts) dict inpu
 --exec (Repeat statement cond) dict input = exec --TODO: How to test after?
 exec [] dict input = [];
 
+unparse :: T -> [String]
+unparse (If cond thenStmts elseStmts) = (("if " ++ Expr.toString cond ++ " then") : indent(unparse thenStmts)) ++
+  ("else" : indent(unparse elseStmts))
+unparse (Skip) = "skip;" : []
+unparse (Assignment var expression) = (var ++ " := " ++ Expr.toString expression ++ ";") : []
+unparse (While cond statement) = ("while " ++ Expr.toString cond ++ " do") : indent(unparse statement)
+unparse (Read var) = ("read " ++ var ++ ";") : []
+unparse (Write expression) = ("write " ++ Expr.toString expression ++ ";") : []
+unparse (Block blockStmts) = "begin" : indent(unparseMany blockStmts) ++ ("end" : [])
+unparse (Repeat statement cond) = ("repeat" : indent(unparse statement)) ++ (("until " ++ Expr.toString cond ++ ";") : [])
+
+unparseMany :: [T] -> [String]
+unparseMany [] = []
+unparseMany (stmt: stmts)= unparse stmt ++ unparseMany stmts
+
+toText :: [String] -> String
+toText [] = ""
+toText (line: stringlines) = line ++ "\n" ++ toText stringlines
+
+indent :: [String] -> [String]
+indent [] = []
+indent (line: stringlines) = ('\t' : line) : indent stringlines
+
 parseSingle = (assignment ! if' ! skip ! while ! read' ! write ! block ! doWhile)
 parseMany = iter parseSingle
 
 instance Parse Statement where
   parse = parseSingle
-  toString = error "Statement.toString not implemented"
+  toString = toText . unparse
