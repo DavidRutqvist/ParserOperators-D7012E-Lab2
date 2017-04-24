@@ -44,6 +44,17 @@ exec (If cond thenStmts elseStmts: stmts) dict input =
     if (Expr.value cond dict)>0
     then exec (thenStmts: stmts) dict input
     else exec (elseStmts: stmts) dict input
+exec (Skip: stmts) dict input = exec stmts dict input
+exec (Assignment var expression: stmts) dict input = exec stmts (Dictionary.insert (var, Expr.value expression dict) dict) input
+exec (While cond statement: stmts) dict input =
+  if (Expr.value cond dict) > 0
+  then exec (statement : (While cond statement) : stmts) dict input
+  else exec stmts dict input
+exec (Read var: stmts) dict (inputVar: remainingInput) = exec stmts (Dictionary.insert (var, inputVar) dict) remainingInput
+exec (Write expression: stmts) dict input = Expr.value expression dict: exec stmts dict input
+exec (Block blockStmts: stmts) dict input = exec (blockStmts ++ stmts) dict input
+--exec (Repeat statement cond) dict input = exec --TODO: How to test after?
+exec [] dict input = [];
 
 parseSingle = (assignment ! if' ! skip ! while ! read' ! write ! block ! doWhile)
 parseMany = iter parseSingle
