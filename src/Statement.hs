@@ -53,7 +53,7 @@ exec (While cond statement: stmts) dict input =
 exec (Read var: stmts) dict (inputVar: remainingInput) = exec stmts (Dictionary.insert (var, inputVar) dict) remainingInput
 exec (Write expression: stmts) dict input = Expr.value expression dict: exec stmts dict input
 exec (Block blockStmts: stmts) dict input = exec (blockStmts ++ stmts) dict input
---exec (Repeat statement cond) dict input = exec --TODO: How to test after?
+exec (Repeat statement cond: stmts) dict input = exec (statement: ((If cond Skip (Repeat statement cond)): stmts)) dict input
 exec [] dict input = [];
 
 unparse :: T -> [String]
