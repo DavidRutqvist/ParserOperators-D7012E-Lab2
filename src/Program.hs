@@ -3,12 +3,12 @@ import Parser hiding (T)
 import qualified Statement
 import qualified Dictionary
 import Prelude hiding (return, fail)
-newtype T = Program ([Statement.T]) -- to be defined
+newtype T = Program ([Statement.T])
 instance Parse T where
   parse = parseProgram
   toString = unparseProgram
 
-exec (Program stmts) input = Statement.exec stmts Dictionary.empty input--TODO: Fix real implementation
+exec (Program stmts) input = Statement.exec stmts Dictionary.empty input
 
 parseProgram = iter Statement.parse >-> buildProgram
 buildProgram (stmts) = Program stmts
